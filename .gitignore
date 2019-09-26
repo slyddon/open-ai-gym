@@ -1,0 +1,17 @@
+# jupyter
+.ipynb_checkpoints
+.ipython
+.jupyter
+.local
+.cache
+
+# data
+data/*.txt
+
+# vscode
+.vscode
+.devcontainer.json
+.bash_history
+
+# pycharm
+__pycache__
