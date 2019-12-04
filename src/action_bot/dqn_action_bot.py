@@ -8,9 +8,10 @@ import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-GAMMA = 0.99  # discount factor
+GAMMA = 0.98  # discount factor
 TAU = 0.001  # for soft update of target parameters
 LR = 0.0005  # learning rate
+EPSILON_MIN = 0.025
 
 
 class DQNActionBot(ActionBot):
@@ -25,7 +26,7 @@ class DQNActionBot(ActionBot):
     def get_dq_action(self):
 
         if (
-            np.random.uniform(0, 1) < max(1 / np.sqrt(self.episode_n + 1), 0.001)
+            np.random.rand() < max(1 / np.sqrt(self.episode_n + 1), EPSILON_MIN)
         ) and not self.demo:
             return self.get_random_action()
 

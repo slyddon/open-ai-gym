@@ -12,6 +12,10 @@ class EpisodeMemory:
         self.action_log = []
         self.total_reward = 0
 
+    def update(self, action, reward):
+        self.action_log.append(action)
+        self.total_reward += reward
+
     def replay(self, render=False):
         env = gym.make(self.env_name)
         env.seed(self.seed)
@@ -61,7 +65,3 @@ class EpisodeMemory:
         plt.show()
 
         env.close()
-
-    def update(self, action, reward):
-        self.action_log.append(action)
-        self.total_reward += reward
