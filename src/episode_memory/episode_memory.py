@@ -16,7 +16,12 @@ class EpisodeMemory:
         self.action_log.append(action)
         self.total_reward += reward
 
-    def replay(self, render=False):
+
+class LanderMemory(EpisodeMemory):
+    def __init__(self):
+        EpisodeMemory.__init__(self, "LunarLander-v2")
+
+    def replay(self, render=False, plot=False):
         env = gym.make(self.env_name)
         env.seed(self.seed)
         _ = env.reset()
@@ -31,7 +36,12 @@ class EpisodeMemory:
             x.append(obs[0])
             y.append(obs[1])
             v.append(np.sqrt(obs[2] ** 2 + obs[3] ** 2))
+        env.close()
 
+        if plot:
+            self.plot(x, y, v)
+
+    def plot(self, x, y, v):
         fig, ax = plt.subplots(figsize=(10, 7))
         # position
         plt.plot(x, y, "--", lw=1.5)
@@ -64,4 +74,61 @@ class EpisodeMemory:
         plt.tight_layout()
         plt.show()
 
+
+class PoleMemory(EpisodeMemory):
+    def __init__(self):
+        EpisodeMemory.__init__(self, "CartPole-v0")
+
+    def replay(self, render=False, plot=False):
+        env = gym.make(self.env_name)
+        env.seed(self.seed)
+        _ = env.reset()
+        
+        x = []
+        v = []
+        a = []
+        av = []
+        for action in self.action_log:
+            if render:
+                env.render()
+            obs, _, _, _ = env.step(action)
+            x.append(obs[0])
+            v.append(obs[1])
+            a.append(obs[2])
+            av.append(obs[3])
         env.close()
+
+
+        if plot:
+            self.plot(x, v, a, av)
+
+    def plot(self, x, v, a, av):
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        # increase the angle when plotting to make it clearer
+        angle_multiplier = 6
+
+        for i in range(len(x)):
+            if i % 5 == 0:
+                plt.plot(
+                    [x[i],  x[i] + np.sin(angle_multiplier*a[i])],
+                    [0, np.cos(angle_multiplier*a[i])], 
+                    c="black", 
+                    lw=0.75
+                )
+        
+        plt.scatter(
+            x + np.sin(angle_multiplier*np.array(a)), 
+            np.cos(angle_multiplier*np.array(a)), 
+            c=(np.abs(av) / np.max(av)), 
+            cmap=plt.cm.get_cmap("Reds"), 
+            s=50
+        )
+
+        sc = plt.scatter(x, np.zeros(len(x)), c=(np.abs(v) / np.max(v)), cmap=plt.cm.get_cmap("Reds"), s=50)
+        cbar = plt.colorbar(sc)
+        cbar.set_label("Velocity", size=20, rotation=270, labelpad=20)
+
+        plt.xlim(-2.5, 2.5)
+        plt.tight_layout()
+        plt.show()
