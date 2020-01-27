@@ -15,18 +15,30 @@ EPSILON_MIN = 0.025
 
 
 class DQNActionBot(ActionBot):
-    def __init__(self, env, learn_rate=LR):
+    def __init__(
+        self, env, learn_rate=LR, gamma=GAMMA, tau=TAU, epsilon_min=EPSILON_MIN
+    ):
         ActionBot.__init__(self, env)
+
+        self.params = {
+            "learn_rate": learn_rate,
+            "gamma": gamma,
+            "tau": tau,
+            "epsilon_min": epsilon_min,
+        }
 
         self.dqn_local = DQN(self.state_space, self.action_space).to(device)
         self.dqn_target = DQN(self.state_space, self.action_space).to(device)
 
-        self.optimizer = optim.Adam(self.dqn_local.parameters(), lr=learn_rate)
+        self.optimizer = optim.Adam(
+            self.dqn_local.parameters(), lr=self.params["learn_rate"]
+        )
 
     def get_dq_action(self):
 
         if (
-            np.random.rand() < max(1 / np.sqrt(self.episode_n + 1), EPSILON_MIN)
+            np.random.rand()
+            < max(1 / np.sqrt(self.episode_n + 1), self.params["epsilon_min"])
         ) and not self.demo:
             return self.get_random_action()
 
@@ -49,7 +61,7 @@ class DQNActionBot(ActionBot):
                 self.dqn_target.forward(next_states), dim=1, keepdim=True
             )[0]
 
-        q_targets = rewards + (GAMMA * q_targets_next * (1 - dones))
+        q_targets = rewards + (self.params["gamma"] * q_targets_next * (1 - dones))
 
         # get outputs
         self.dqn_local.train()
@@ -67,7 +79,7 @@ class DQNActionBot(ActionBot):
         # take one SGD step
         self.optimizer.step()
         # ------------------- update target network ------------------- #
-        self.soft_update(self.dqn_local, self.dqn_target, TAU)
+        self.soft_update(self.dqn_local, self.dqn_target, self.params["tau"])
 
     @staticmethod
     def soft_update(local_model, target_model, tau):

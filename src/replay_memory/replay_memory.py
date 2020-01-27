@@ -6,7 +6,7 @@ import torch
 
 BATCH_SIZE = 64  # minibatch size - sample to train on
 BUFFER_SIZE = 10000  # number of experiences to store
-UPDATE_EVERY = 4  # UPDATE FREQUENCY: how often to update the network
+UPDATE_EVERY = 4  # how often to update the network
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -17,22 +17,28 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 class ReplayMemory:
-    def __init__(self, buffer_size=BUFFER_SIZE, batch_size=BATCH_SIZE):
-        self.memory = deque(maxlen=buffer_size)
-        self.batch_size = batch_size
+    def __init__(
+        self, buffer_size=BUFFER_SIZE, batch_size=BATCH_SIZE, update_every=UPDATE_EVERY
+    ):
+        self.params = {
+            "buffer_size": buffer_size,
+            "batch_size": batch_size,
+            "update_every": update_every,
+        }
+        self.memory = deque(maxlen=self.params["buffer_size"])
 
     def update(self, state, action, reward, next_state, done, t_step):
         self.memory.append((state, action, reward, next_state, done))
 
-        if t_step % UPDATE_EVERY == 0:
-            if len(self.memory) > self.batch_size:
+        if t_step % self.params["update_every"] == 0:
+            if len(self.memory) > self.params["batch_size"]:
                 experiences = self._sample_experience()
                 return experiences, True  # should the dqn learn?
 
         return None, False
 
     def _sample_experience(self):
-        experiences = random.sample(self.memory, k=self.batch_size)
+        experiences = random.sample(self.memory, k=self.params["batch_size"])
 
         states = (
             torch.from_numpy(np.vstack([e[0] for e in experiences if e is not None]))
