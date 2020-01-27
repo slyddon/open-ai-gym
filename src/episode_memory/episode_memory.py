@@ -47,7 +47,7 @@ class LanderMemory(EpisodeMemory):
         plt.plot(x, y, "--", lw=1.5)
         # velocity
         sc = plt.scatter(x, y, c=(v / np.max(v)), cmap=plt.cm.get_cmap("Reds"), s=50)
-        cbar = plt.colorbar(sc)
+        cbar = plt.colorbar(sc, pad=0.01)
         cbar.set_label("Velocity", size=20, rotation=270, labelpad=20)
         # target
         plt.scatter(0, 0, marker="x", c="black", s=100)
@@ -83,7 +83,7 @@ class PoleMemory(EpisodeMemory):
         env = gym.make(self.env_name)
         env.seed(self.seed)
         _ = env.reset()
-        
+
         x = []
         v = []
         a = []
@@ -98,36 +98,53 @@ class PoleMemory(EpisodeMemory):
             av.append(obs[3])
         env.close()
 
-
         if plot:
             self.plot(x, v, a, av)
 
     def plot(self, x, v, a, av):
-        fig, ax = plt.subplots(figsize=(10, 7))
+        fig, ax = plt.subplots(figsize=(15, 7))
 
         # increase the angle when plotting to make it clearer
         angle_multiplier = 6
-
+        # plot every Nth pole
+        POLE_SAMPLE = 5
         for i in range(len(x)):
-            if i % 5 == 0:
+            if i % POLE_SAMPLE == 0:
                 plt.plot(
-                    [x[i],  x[i] + np.sin(angle_multiplier*a[i])],
-                    [0, np.cos(angle_multiplier*a[i])], 
-                    c="black", 
-                    lw=0.75
+                    [x[i], x[i] + np.sin(angle_multiplier * a[i])],
+                    [0, np.cos(angle_multiplier * a[i])],
+                    c="black",
+                    lw=0.75,
                 )
-        
+        # angular velocity of the end of the pole
         plt.scatter(
-            x + np.sin(angle_multiplier*np.array(a)), 
-            np.cos(angle_multiplier*np.array(a)), 
-            c=(np.abs(av) / np.max(av)), 
-            cmap=plt.cm.get_cmap("Reds"), 
-            s=50
+            x + np.sin(angle_multiplier * np.array(a)),
+            np.cos(angle_multiplier * np.array(a)),
+            c=(np.abs(av) / np.max(av)),
+            cmap=plt.cm.get_cmap("Reds"),
+            s=50,
         )
-
-        sc = plt.scatter(x, np.zeros(len(x)), c=(np.abs(v) / np.max(v)), cmap=plt.cm.get_cmap("Reds"), s=50)
-        cbar = plt.colorbar(sc)
+        # velocity of the pole base
+        sc = plt.scatter(
+            x,
+            np.zeros(len(x)),
+            c=(np.abs(v) / np.max(v)),
+            cmap=plt.cm.get_cmap("Reds"),
+            s=50,
+        )
+        cbar = plt.colorbar(sc, pad=0.01)
         cbar.set_label("Velocity", size=20, rotation=270, labelpad=20)
+        # reward
+        plt.text(
+            0.05,
+            0.95,
+            f"Total reward: {round(self.total_reward, 1)}",
+            horizontalalignment="left",
+            verticalalignment="center",
+            size=20,
+            fontname="monospace",
+            transform=ax.transAxes,
+        )
 
         plt.xlim(-2.5, 2.5)
         plt.tight_layout()
