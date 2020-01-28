@@ -9,7 +9,8 @@
 .cache
 
 # data
-fitted_models/
+fitted_models/*.p
+fitted_models/*.pt
 training_history/
 
 # vscode
