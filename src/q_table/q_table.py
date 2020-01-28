@@ -4,9 +4,14 @@ import matplotlib.colors as col
 import pickle
 import os
 
+LEARN_RATE = 0.2
+DISCOUNT_RATE = 0.7
+
 
 class QTable:
-    def __init__(self, env_action_space):
+    def __init__(
+        self, env_action_space, learn_rate=LEARN_RATE, discount_rate=DISCOUNT_RATE
+    ):
 
         self.x_positions = np.linspace(-0.75, 0.75, 30)
         self.y_positions = np.linspace(-0.1, 1.5, 35)
@@ -14,8 +19,8 @@ class QTable:
         self.vel_thresh = 10 ** np.linspace(-2, 0, 10)
         self.leg_touching = [0, 1]
 
-        self.learn_rate = 0.2
-        self.discount_rate = 0.7
+        self.learn_rate = learn_rate
+        self.discount_rate = discount_rate
 
         # quantize state space
         self.q_table = np.zeros(
@@ -64,9 +69,14 @@ class QTable:
 
     def update_table(self, obs, new_obs, action, reward):
         idx_x, idx_y, idx_a, idx_vx, idx_vy, idx_l = self.get_obs_info(obs)
-        new_idx_x, new_idx_y, new_idx_a, new_idx_vx, new_idx_vy, new_idx_l = self.get_obs_info(
-            new_obs
-        )
+        (
+            new_idx_x,
+            new_idx_y,
+            new_idx_a,
+            new_idx_vx,
+            new_idx_vy,
+            new_idx_l,
+        ) = self.get_obs_info(new_obs)
 
         old_q = self.q_table[idx_x, idx_y, idx_a, idx_vx, idx_vy, idx_l, action]
         action_qspace = self.q_table[
