@@ -12,11 +12,18 @@ GAMMA = 0.98  # discount factor
 TAU = 0.001  # for soft update of target parameters
 LR = 0.0005  # learning rate
 EPSILON_MIN = 0.025
+HIDDEN_SIZE = 256
 
 
 class DQNActionBot(ActionBot):
     def __init__(
-        self, env, learn_rate=LR, gamma=GAMMA, tau=TAU, epsilon_min=EPSILON_MIN
+        self,
+        env,
+        learn_rate=LR,
+        gamma=GAMMA,
+        tau=TAU,
+        epsilon_min=EPSILON_MIN,
+        hidden_size=HIDDEN_SIZE,
     ):
         ActionBot.__init__(self, env)
 
@@ -25,10 +32,15 @@ class DQNActionBot(ActionBot):
             "gamma": gamma,
             "tau": tau,
             "epsilon_min": epsilon_min,
+            "hidden_size": hidden_size,
         }
 
-        self.dqn_local = DQN(self.state_space, self.action_space).to(device)
-        self.dqn_target = DQN(self.state_space, self.action_space).to(device)
+        self.dqn_local = DQN(self.state_space, self.action_space, hidden_size).to(
+            device
+        )
+        self.dqn_target = DQN(self.state_space, self.action_space, hidden_size).to(
+            device
+        )
 
         self.optimizer = optim.Adam(
             self.dqn_local.parameters(), lr=self.params["learn_rate"]
@@ -39,6 +51,7 @@ class DQNActionBot(ActionBot):
         if (
             np.random.rand()
             < max(1 / np.sqrt(self.episode_n + 1), self.params["epsilon_min"])
+            # (1 - np.heaviside(np.arange(max_time_steps)-start, 0)) + np.heaviside(np.arange(max_time_steps)-start, 0) * np.maximum(0.1, np.nan_to_num(1/(np.sqrt(np.arange(max_time_steps) - (start - 1))), 0))
         ) and not self.demo:
             return self.get_random_action()
 
