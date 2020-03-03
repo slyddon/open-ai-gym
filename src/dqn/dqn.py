@@ -4,14 +4,11 @@ import torch.nn.functional as F
 
 
 class DQN(nn.Module):
-    def __init__(self, state_size, action_size, hidden_size=64):
+    def __init__(self, state_size, action_size, hidden_size=256):
 
         super(DQN, self).__init__()
-        self.state_size = state_size
-        self.action_size = action_size
-        self.hidden_size = hidden_size
 
-        self.fc1 = nn.Linear(self.state_size, self.hidden_size)
+        self.fc1 = nn.Linear(state_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, hidden_size)
         self.fc4 = nn.Linear(hidden_size, action_size)
