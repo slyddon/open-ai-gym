@@ -12,8 +12,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # Experience replay
-# Store experiences in a large table. Randomly sample from experiences 
-# and use them to train rather than using the latest experience on the fly. 
+# Store experiences in a large table. Randomly sample from experiences
+# and use them to train rather than using the latest experience on the fly.
 # More efficient use of experience
 
 

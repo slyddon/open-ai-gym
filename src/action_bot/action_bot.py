@@ -12,6 +12,9 @@ class ActionBot:
         self.demo = demo
 
     def get_action_by_angle(self):
+        if self.env.spec.id != "LunarLander-v0":
+            raise ValueError(f"Action type not valid for env: {self.env.spec.id}")
+
         _, _, vel_x, vel_y, lander_ang, _, _, _ = self.obs
 
         dv = np.sqrt(vel_x ** 2 + vel_y ** 2)
